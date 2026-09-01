@@ -1,3 +1,13 @@
+> **Dockerized fork.** This repository packages **CDMetaPOP** to build and run in Docker
+> with a persistent, host-mounted data directory. The model source and science are unchanged;
+> only container tooling was added. See **[DOCKER.md](DOCKER.md)** for usage.
+>
+> Original project by the Computational Ecology Laboratory, University of Montana:
+> https://github.com/ComputationalEcologyLab/CDMetaPOP — all original authorship,
+> documentation, and the project disclaimer are retained below.
+
+---
+
 ======
 README
 ======

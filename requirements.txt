@@ -1,0 +1,5 @@
+# Pinned to match the project's conda environment (environment.yml)
+# so the container reproduces the same numerical stack as CDMetaPOP v3.08.
+numpy==2.2.6
+scipy==1.15.2
+pandas==2.3.3

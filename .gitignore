@@ -45,3 +45,26 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# =========================
+# CDMetaPOP / Docker project
+# =========================
+# Local runtime data directory + model output (bind-mounted at /data)
+/data/
+# Output folders CDMetaPOP writes (prefix + unix timestamp)
+output*/
+smoke*/
+# Local compose environment overrides
+.env
+# Temp/cleanup
+_to_delete/
+buildctx.tgz

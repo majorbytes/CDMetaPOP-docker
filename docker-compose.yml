@@ -1,0 +1,28 @@
+# CDMetaPOP v3.08 in Docker.
+#
+# The DATA_DIR host path is where inputs live and results are written -- this is
+# the "data dir assigned to the local server". Set it in a .env file (see
+# .env.example) or inline, e.g.:
+#
+#   DATA_DIR=/srv/cdmetapop/data docker compose run --rm cdmetapop
+#
+# Build once:      docker compose build
+# Run the model:   docker compose run --rm cdmetapop
+# Interactive:     docker compose run --rm cdmetapop bash
+services:
+  cdmetapop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cdmetapop:3.08
+    environment:
+      # File (relative to /data) selecting the scenarios to run.
+      RUNVARS: ${RUNVARS:-RunVars.csv}
+      # Output folder prefix; CDMetaPOP appends a unix-timestamp to it.
+      OUTPUT_NAME: ${OUTPUT_NAME:-output}
+      # Seed /data with the bundled example inputs when it is empty.
+      SEED_EXAMPLES: ${SEED_EXAMPLES:-1}
+    volumes:
+      # Host path -> container /data. Change DATA_DIR to point at your server's
+      # storage (an absolute path or a Docker named volume both work).
+      - ${DATA_DIR:-./data}:/data
