@@ -110,16 +110,69 @@ docker run --rm -v /srv/cdmetapop/data:/data \
   cdmetapop:3.08
 ```
 
+## Running as your own user (Linux)
+
+By default the container runs as **root**, so files it writes to your bind-mounted
+data directory come out owned by `root`. On Linux you usually want them owned by
+you. Run the container as your host user/group:
+
+**Per run (no config changes):**
+
+```bash
+docker compose run --rm --user "$(id -u):$(id -g)" cdmetapop
+```
+
+**Or make it the default** via the `user:` line already in `docker-compose.yml`,
+by setting your IDs in `.env` (copy from `.env.example`):
+
+```ini
+DOCKER_UID=1000     # your `id -u`
+DOCKER_GID=1000     # your `id -g`
+```
+
+```bash
+# equivalently, inline for one run:
+DOCKER_UID=$(id -u) DOCKER_GID=$(id -g) docker compose run --rm cdmetapop
+```
+
+Left unset, `DOCKER_UID`/`DOCKER_GID` default to `0:0` (root), so nothing changes
+for anyone who doesn't set them. This isn't needed on Docker Desktop for
+Windows/Mac, where the bind-mount layer already maps ownership to you.
+
+### Why a number and not your username
+
+Use the numeric UID/GID, not a name like `--user allen`. At the kernel level,
+file ownership and process identity are **numbers**; a username is only a label
+that `/etc/passwd` maps to a number — and the container has its *own*
+`/etc/passwd`. Passing a name makes Docker look it up **inside the container**,
+where your username doesn't exist (`unable to find user ...`), and even if it did
+it could map to a different number than on your host. The bind mount records
+ownership by number, so matching the number is what actually makes the files come
+out owned by you. (To have a real *named* non-root user in the image you'd create
+one at build time with a pinned UID, e.g. `useradd -u 1000` — but that just
+hardcodes the same number and only helps hosts where you are 1000.)
+
+### SELinux (Rocky/RHEL/Fedora)
+
+These distros ship SELinux enforcing. If, after switching to a non-root user, a
+run fails with `Permission denied` on `/data`, add the `:Z` flag to the volume so
+Docker relabels the host folder for container access — change the volume line in
+`docker-compose.yml` to:
+
+```yaml
+      - ${DATA_DIR:-./data}:/data:Z
+```
+
+(`:Z` relabels the folder for exclusive use by this container; use `:z` instead
+if several containers share the same folder. Harmless no-op on Docker Desktop.)
+
 ## Notes
 
 - **Multi-species / multi-core.** CDMetaPOP uses Python multiprocessing
   (`ncores` in the run file, one process per species). Give Docker enough CPUs
   (Docker Desktop: Settings -> Resources) or cap it with `--cpus`.
-- **File ownership on Linux hosts.** The container runs as root, so files it
-  writes to a bind mount are root-owned. To get your own UID instead, add to the
-  `cdmetapop` service in `docker-compose.yml`:
-  `user: "${UID}:${GID}"` and run with
-  `UID=$(id -u) GID=$(id -g) docker compose run --rm cdmetapop`.
-  (Not an issue on Docker Desktop for Windows/Mac.)
+- **File ownership on Linux hosts.** By default output is root-owned; see
+  [Running as your own user (Linux)](#running-as-your-own-user-linux) to have it
+  written as you.
 - **Rebuild after changing source.** `docker compose build` again; your `/data`
   contents are untouched by rebuilds.

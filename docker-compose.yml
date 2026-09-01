@@ -15,6 +15,9 @@ services:
       context: .
       dockerfile: Dockerfile
     image: cdmetapop:3.08
+    # Run as your host user so files written to the bind mount are owned by you,
+    # not root (Linux). Set DOCKER_UID/DOCKER_GID in .env or inline; unset = root.
+    user: "${DOCKER_UID:-0}:${DOCKER_GID:-0}"
     environment:
       # File (relative to /data) selecting the scenarios to run.
       RUNVARS: ${RUNVARS:-RunVars_demo.csv}
