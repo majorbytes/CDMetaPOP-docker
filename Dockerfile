@@ -31,8 +31,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Persistent data directory. Bind-mount a host path here (see docker-compose.yml
 # / DOCKER.md). Inputs are read from here and all output folders are written here.
 ENV DATA_DIR=/data \
-    RUNVARS=RunVars.csv \
-    OUTPUT_NAME=output \
+    RUNVARS=RunVars_demo.csv \
+    OUTPUT_NAME=demo \
     SEED_EXAMPLES=1
 RUN mkdir -p /data
 VOLUME ["/data"]

@@ -9,6 +9,11 @@ The Docker usage guide is below. The original CDMetaPOP README follows after it.
 
 ## Running CDMetaPOP in Docker
 
+> **Try the demo (~30 seconds).** With Docker installed, from this folder run
+> `docker compose build` then `docker compose run --rm cdmetapop`. With no
+> configuration the container seeds a local `./data/` with the bundled inputs,
+> runs a short single-batch example, and writes results to `./data/demo<timestamp>/`.
+
 This packages CDMetaPOP v3.08 as a reproducible container. The image pins the
 same scientific stack as `environment.yml` (Python 3.10, NumPy 2.2.6,
 SciPy 1.15.2, pandas 2.3.3), so results match a local conda run.
@@ -34,7 +39,7 @@ host: <DATA_DIR>            <->   container: /data
 
 - Docker (Docker Desktop on Windows/Mac, or Docker Engine on Linux).
 
-## Quick start (bundled example)
+## Quick start (the demo)
 
 From this folder (the one containing `Dockerfile`):
 
@@ -44,8 +49,17 @@ docker compose run --rm cdmetapop
 ```
 
 `DATA_DIR` defaults to `./data`. Because it starts empty, the container seeds it
-with the bundled `example_files/` and runs `RunVars.csv`. When it finishes, look
-in `./data/output<timestamp>/` for results.
+with the bundled `example_files/` and runs the fast demo (`RunVars_demo.csv` — a
+single-batch, 5-generation scenario, ~30 s). When it finishes, look in
+`./data/demo<timestamp>/` for results, e.g. `summary_popAllTime.csv`.
+
+### Run the full example instead
+
+The upstream example (`RunVars.csv`) runs four scenarios and takes a few minutes:
+
+```bash
+RUNVARS=RunVars.csv OUTPUT_NAME=output docker compose run --rm cdmetapop
+```
 
 ## Point the data directory at your server storage
 

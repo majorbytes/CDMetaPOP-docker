@@ -17,9 +17,9 @@ services:
     image: cdmetapop:3.08
     environment:
       # File (relative to /data) selecting the scenarios to run.
-      RUNVARS: ${RUNVARS:-RunVars.csv}
+      RUNVARS: ${RUNVARS:-RunVars_demo.csv}
       # Output folder prefix; CDMetaPOP appends a unix-timestamp to it.
-      OUTPUT_NAME: ${OUTPUT_NAME:-output}
+      OUTPUT_NAME: ${OUTPUT_NAME:-demo}
       # Seed /data with the bundled example inputs when it is empty.
       SEED_EXAMPLES: ${SEED_EXAMPLES:-1}
     volumes:

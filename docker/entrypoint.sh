@@ -19,8 +19,8 @@
 set -euo pipefail
 
 DATA_DIR="${DATA_DIR:-/data}"
-RUNVARS="${RUNVARS:-RunVars.csv}"
-OUTPUT_NAME="${OUTPUT_NAME:-output}"
+RUNVARS="${RUNVARS:-RunVars_demo.csv}"
+OUTPUT_NAME="${OUTPUT_NAME:-demo}"
 SEED_EXAMPLES="${SEED_EXAMPLES:-1}"
 
 mkdir -p "$DATA_DIR"
