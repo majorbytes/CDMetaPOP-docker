@@ -112,18 +112,10 @@ docker run --rm -v /srv/cdmetapop/data:/data \
 
 ## Running as your own user (Linux)
 
-By default the container runs as **root**, so files it writes to your bind-mounted
-data directory come out owned by `root`. On Linux you usually want them owned by
-you. Run the container as your host user/group:
-
-**Per run (no config changes):**
-
-```bash
-docker compose run --rm --user "$(id -u):$(id -g)" cdmetapop
-```
-
-**Or make it the default** via the `user:` line already in `docker-compose.yml`,
-by setting your IDs in `.env` (copy from `.env.example`):
+By default the container runs as **root**, so output written to your bind-mounted
+data directory comes out owned by `root`. On Linux you usually want it owned by
+you. Just tell it your host UID/GID — set them in `.env` (copy from
+`.env.example`):
 
 ```ini
 DOCKER_UID=1000     # your `id -u`
@@ -131,33 +123,40 @@ DOCKER_GID=1000     # your `id -g`
 ```
 
 ```bash
-# equivalently, inline for one run:
+docker compose run --rm cdmetapop
+# or inline, without editing .env:
 DOCKER_UID=$(id -u) DOCKER_GID=$(id -g) docker compose run --rm cdmetapop
 ```
 
-Left unset, `DOCKER_UID`/`DOCKER_GID` default to `0:0` (root), so nothing changes
-for anyone who doesn't set them. This isn't needed on Docker Desktop for
-Windows/Mac, where the bind-mount layer already maps ownership to you.
+**How it works.** The image starts as root *inside the container* — which needs
+**no root/sudo on the host**; it's provided by the Docker daemon you already use.
+The entrypoint seeds the data dir, `chown`s it to your UID/GID, then drops
+privileges with `gosu` so the model runs — and writes its output — as you. Because
+root does the setup first, an **empty or root-owned data dir is handled
+automatically**: no pre-creating the folder, no manual `chown`.
+
+Left unset, `DOCKER_UID`/`DOCKER_GID` mean "stay root" (the original behavior), so
+nothing changes for anyone who doesn't set them. None of this is needed on Docker
+Desktop for Windows/Mac, where the bind-mount layer already maps ownership to you.
 
 ### Why a number and not your username
 
-Use the numeric UID/GID, not a name like `--user allen`. At the kernel level,
-file ownership and process identity are **numbers**; a username is only a label
-that `/etc/passwd` maps to a number — and the container has its *own*
-`/etc/passwd`. Passing a name makes Docker look it up **inside the container**,
-where your username doesn't exist (`unable to find user ...`), and even if it did
-it could map to a different number than on your host. The bind mount records
-ownership by number, so matching the number is what actually makes the files come
-out owned by you. (To have a real *named* non-root user in the image you'd create
-one at build time with a pinned UID, e.g. `useradd -u 1000` — but that just
-hardcodes the same number and only helps hosts where you are 1000.)
+Use the numeric UID/GID, not a name. At the kernel level, file ownership and
+process identity are **numbers**; a username is only a label that `/etc/passwd`
+maps to a number — and the container has its *own* `/etc/passwd`. A name would be
+looked up **inside the container**, where your username doesn't exist (`unable to
+find user ...`), and even if it did it could map to a different number than on your
+host. The bind mount records ownership by number, so matching the number is what
+actually makes the files come out owned by you. (To have a real *named* non-root
+user in the image you'd create one at build time with a pinned UID, e.g.
+`useradd -u 1000` — but that just hardcodes the same number and only helps hosts
+where you are 1000.)
 
 ### SELinux (Rocky/RHEL/Fedora)
 
-These distros ship SELinux enforcing. If, after switching to a non-root user, a
-run fails with `Permission denied` on `/data`, add the `:Z` flag to the volume so
-Docker relabels the host folder for container access — change the volume line in
-`docker-compose.yml` to:
+These distros ship SELinux enforcing. If a run fails with `Permission denied` on
+`/data`, add the `:Z` flag to the volume so Docker relabels the host folder for
+container access — change the volume line in `docker-compose.yml` to:
 
 ```yaml
       - ${DATA_DIR:-./data}:/data:Z

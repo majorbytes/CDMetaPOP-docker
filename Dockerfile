@@ -17,6 +17,12 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
+# gosu lets the entrypoint drop from container-root to the caller's UID so
+# output written to the bind-mounted data dir is owned by the host user.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends gosu \
+ && rm -rf /var/lib/apt/lists/*
+
 # Dependencies first, so edits to source don't invalidate the wheel-install layer.
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
