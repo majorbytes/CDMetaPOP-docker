@@ -32,7 +32,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY example_files/ ./example_files/
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Strip any CR so the script runs even if checked out with Windows (CRLF)
+# line endings, then make it executable.
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
+ && chmod +x /usr/local/bin/entrypoint.sh
 
 # Persistent data directory. Bind-mount a host path here (see docker-compose.yml
 # / DOCKER.md). Inputs are read from here and all output folders are written here.

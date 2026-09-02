@@ -15,3 +15,8 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+
+# Shell scripts must keep LF line endings so they run inside Linux
+# containers even when the repo is checked out on Windows.
+*.sh text eol=lf
+docker/entrypoint.sh text eol=lf
